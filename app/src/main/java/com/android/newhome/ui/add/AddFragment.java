@@ -1,4 +1,4 @@
-package com.android.newhome.ui.notifications;
+package com.android.newhome.ui.add;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.newhome.R;
 
-public class NotificationsFragment extends Fragment {
+public class AddFragment extends Fragment {
 
-    private NotificationsViewModel notificationsViewModel;
+    private AddViewModel addViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_notifications, container, false);
-        final TextView textView = root.findViewById(R.id.text_notifications);
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        addViewModel =
+                new ViewModelProvider(this).get(AddViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_add, container, false);
+        final TextView textView = root.findViewById(R.id.text_add);
+        addViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
