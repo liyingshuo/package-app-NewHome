@@ -27,6 +27,6 @@ public class LuncherActivity extends AppCompatActivity {
                 finish();
             }
         };
-        timer.schedule(timerTask,2000);
+        timer.schedule(timerTask,1000);
     }
 }
