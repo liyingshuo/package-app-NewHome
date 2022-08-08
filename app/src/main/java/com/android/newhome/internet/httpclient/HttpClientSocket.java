@@ -4,8 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.android.newhome.application.Application;
+import com.android.newhome.internet.typedefined.TypeDefined;
 import com.android.newhome.internet.urlconstructor.UrlConstructor;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +61,7 @@ public class HttpClientSocket {
 
                     //httpURLConnection接收服务器数据
                     if (httpURLConnection.getResponseCode() == 200){
-                        receiveMessage(type, httpURLConnection);
+                        receiveMessage(httpURLConnection);
                     }
 
                     //拿到了返回的数据之后记得关闭I/OputStream以及创建的连接HttpURLConnection
@@ -87,7 +90,7 @@ public class HttpClientSocket {
         thread.start();
     }
 
-    public void receiveMessage(int type, HttpURLConnection httpURLConnection) {
+    public void receiveMessage(HttpURLConnection httpURLConnection) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -97,7 +100,32 @@ public class HttpClientSocket {
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
                     //httpURLConnection接收数据
-                    String message = bufferedReader.readLine();
+                    String message = "";
+                    String str;
+                    JSONObject jsonObject = new JSONObject();
+                    while((str = bufferedReader.readLine()) != null){
+
+                        String[] key_value = str.split("=");
+                        String key = key_value[0];
+                        String value = key_value[1];
+
+                        //判断是否是数据头
+                        if(key.equals("type") && jsonObject.has("type")){
+                            message = message + "\n";
+                            //将数据添加到全局JsonArray中
+                            JSONArray jsonArray = judjeJsonArrayType(value);
+                            jsonArray.put(jsonObject);
+                            //为之后的数据新建JSONObject
+                            jsonObject = new JSONObject();
+                        }
+
+                        message = message + str + "\n";
+                        jsonObject.put(key,value);
+                    }
+                    //接受的最后一组数据也要保存，否则数据会丢失
+                    JSONArray jsonArray = judjeJsonArrayType(jsonObject.getString("type"));
+                    jsonArray.put(jsonObject);
+
                     msg.what = 3; //消息接收成功
                     msg.obj = message;
                     handler.sendMessage(msg);
@@ -107,7 +135,7 @@ public class HttpClientSocket {
                     //发送并接收数据成功则退出函数，不重新执行runable
                     return;
 
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     Log.e("HttpClientSocket", "sendMessage: generate JSONObject failed");
                     e.printStackTrace();
                 }
@@ -118,5 +146,20 @@ public class HttpClientSocket {
             }
         });
         thread.start();
+    }
+
+    private JSONArray judjeJsonArrayType(String string){
+        JSONArray jsonArray = null;
+
+        if (string.equals(Integer.toString(TypeDefined.TYPE_REQUEST_HOME))){
+            jsonArray = Application.g_homeinfolist;
+        } else if (string.equals(Integer.toString(TypeDefined.TYPE_REQUEST_MAP))) {
+        } else if (string.equals(Integer.toString(TypeDefined.TYPE_REQUEST_ADD))) {
+        } else if (string.equals(Integer.toString(TypeDefined.TYPE_REQUEST_MESSAGE))) {
+        } else if (string.equals(Integer.toString(TypeDefined.TYPE_REQUEST_MYSELF))) {
+        } else {
+        }
+
+        return jsonArray;
     }
 }

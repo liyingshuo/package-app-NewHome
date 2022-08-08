@@ -16,8 +16,13 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.newhome.R;
+import com.android.newhome.application.Application;
 import com.android.newhome.internet.httpclient.HttpClientSocket;
 import com.android.newhome.internet.typedefined.TypeDefined;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URL;
 
@@ -49,23 +54,21 @@ public class HomeFragment extends Fragment {
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
                 if(lastMsgWhat == msg.what) return;
-                //lastMsgWhat = msg.what;
+                lastMsgWhat = msg.what;
                 switch (msg.what){
-                    case 0:
-                        Toast.makeText(getContext(), "tcpClientSocket发送数据失败",Toast.LENGTH_SHORT).show();
+                    case 0: //发送数据失败
                         textView.setText("tcpClientSocket发送数据失败");
                         break;
-                    case 1:
-                        Toast.makeText(getContext(), "tcpClientSocket发送数据成功",Toast.LENGTH_SHORT).show();
+                    case 1: //发送数据成功
                         textView.setText(msg.obj.toString());
                         break;
-                    case 2:
-                        Toast.makeText(getContext(), "tcpClientSocket接收数据失败",Toast.LENGTH_SHORT).show();
+                    case 2: //接收数据失败
                         textView.setText("tcpClientSocket接收数据失败");
                         break;
-                    case 3:
-                        Toast.makeText(getContext(), "tcpClientSocket接收数据成功",Toast.LENGTH_SHORT).show();
-                        textView.setText(msg.obj.toString());
+                    case 3: //接收数据成功
+                        String string = "";
+                        string = showJsonArrayInfoList(Application.g_homeinfolist);
+                        textView.setText(string);
                         break;
                     default:
                         break;
@@ -81,5 +84,18 @@ public class HomeFragment extends Fragment {
         httpClientSocket.sendMessage(type, message);
 
         return root;
+    }
+
+    private String showJsonArrayInfoList(JSONArray jsonArray){
+        String string = "";
+        for (int i = 0; i < Application.g_homeinfolist.length(); i++){
+            try {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                string = string + jsonObject.toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return string;
     }
 }

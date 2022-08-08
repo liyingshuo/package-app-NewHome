@@ -10,7 +10,7 @@ public class UrlConstructor {
     public static URL getURL(int type, String message){
         String address = "";
         address += "http://10.221.129.198:8080/request?";
-        address += "type=" + Integer.toString(type);
+        address += "type=" + type;
 //        address += "&";
 //        address += "message=" + message;
 
