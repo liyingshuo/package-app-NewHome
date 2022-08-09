@@ -101,7 +101,7 @@ public class HttpClientSocket {
 
                     //httpURLConnection接收数据
                     String message = "";
-                    String str;
+                    String str = "";
                     JSONObject jsonObject = new JSONObject();
                     while((str = bufferedReader.readLine()) != null){
 
@@ -126,6 +126,7 @@ public class HttpClientSocket {
                     JSONArray jsonArray = judjeJsonArrayType(jsonObject.getString("type"));
                     jsonArray.put(jsonObject);
 
+
                     msg.what = 3; //消息接收成功
                     msg.obj = message;
                     handler.sendMessage(msg);
@@ -135,14 +136,20 @@ public class HttpClientSocket {
                     //发送并接收数据成功则退出函数，不重新执行runable
                     return;
 
-                } catch (IOException | JSONException e) {
-                    Log.e("HttpClientSocket", "sendMessage: generate JSONObject failed");
+                } catch (Exception e) {
+                    Log.e("HttpClientSocket", "receiveMessage: bufferedReader.readLine failed");
                     e.printStackTrace();
                 }
                 msg.what = 2; //消息接收失败
                 handler.sendMessage(msg);
+
                 //每隔100ms后重新调用receive服务发送数据
-                handler.postDelayed(this::run, 100);
+                //若请求已经发送并成功响应一次，这里再次接收消息会失败
+                //如有需要，应该重新发送请求，然后重新接收响应
+                //那假如第一次请求响应失败，该如何处理呢
+                //这里还没有遇到这个情况，服务器运行正常的情况下，响应都成功了
+                //handler.postDelayed(this::run, 100);
+
             }
         });
         thread.start();

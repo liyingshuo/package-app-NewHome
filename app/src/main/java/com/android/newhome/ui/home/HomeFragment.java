@@ -55,6 +55,7 @@ public class HomeFragment extends Fragment {
                 super.handleMessage(msg);
                 if(lastMsgWhat == msg.what) return;
                 lastMsgWhat = msg.what;
+                String string = "";
                 switch (msg.what){
                     case 0: //发送数据失败
                         textView.setText("tcpClientSocket发送数据失败");
@@ -63,10 +64,19 @@ public class HomeFragment extends Fragment {
                         textView.setText(msg.obj.toString());
                         break;
                     case 2: //接收数据失败
-                        textView.setText("tcpClientSocket接收数据失败");
+                        //接收数据失败有两种情况
+                        //1.第一次发送url请求，未收到响应，这种情况应该重新持续接收请求
+                        //2.第一次发送url请求后成功接收响应，再次请求会失败
+                        //这样的话，只需要显示已经接收到的数据就好
+                        string = showJsonArrayInfoList(Application.g_homeinfolist);
+                        if(string.equals("")){
+                            string = "tcpClientSocket接收数据失败";
+                            sendHomeInfoRequest();
+                        }
+                        textView.setText(string);
                         break;
                     case 3: //接收数据成功
-                        String string = "";
+                        string = "";
                         string = showJsonArrayInfoList(Application.g_homeinfolist);
                         textView.setText(string);
                         break;
@@ -78,12 +88,16 @@ public class HomeFragment extends Fragment {
 
         httpClientSocket = new HttpClientSocket(handler);
 
+        sendHomeInfoRequest();
+
+        return root;
+    }
+
+    private void sendHomeInfoRequest() {
         //向服务器请求数据
         int type = TypeDefined.TYPE_REQUEST_HOME;
         String message = "TYPE_REQUEST_HOME";
         httpClientSocket.sendMessage(type, message);
-
-        return root;
     }
 
     private String showJsonArrayInfoList(JSONArray jsonArray){
