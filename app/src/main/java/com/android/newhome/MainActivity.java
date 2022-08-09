@@ -1,6 +1,8 @@
 package com.android.newhome;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -30,5 +32,23 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         Application application = new Application();
+    }
+
+    protected long exitTime;
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if(KeyEvent.KEYCODE_BACK == keyCode){
+            if(System.currentTimeMillis() - exitTime > 2000){
+                Toast.makeText(this, "再按一次退出程序！", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+                //这里如果不执行return，就会执行下面super.onKeyUp，导致Activity重新加载显示
+                //底部导航栏状态会被重置为第一个默认选项卡
+                return true;
+            } else {
+                finish();
+                System.exit(0);
+            }
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }
